@@ -3,15 +3,17 @@ Denby
 
 Welcome! Consider yourself warned. :-)
 
-## Denby
+## Components
+
+### Denby
 
 Web client application (not included in the repository just yet).
 
-## Proxy (per-client)
+### Proxy (per-client)
 
 Socket.IO (and JSON-RPC-over-SIO) interface between Denby and Ripley.
 
-## Ripley (singular)
+### Ripley (singular)
 
 Twitter user/site streams manager and future destination for all the cool 'cloud' features.
 
