@@ -1,0 +1,24 @@
+{ "name": "denby"
+, "version": "v0.0.1"
+, "description": ""
+, "keywords": ["twitter","client","streaming","html5"]
+, "homepage": "http://www.hellodenby.com/"
+, "author":
+  { "name": "Jeff Waugh"
+  , "url": "http://bethesignal.org/"
+  }
+, "licenses":
+  [ { "type": "AGPLv3"
+    , "url": "http://www.gnu.org/licenses/agpl-3.0.txt"
+  } ]
+, "repository":
+  { "type": "git"
+  , "url": "http://github.com/jdub/denby.git"
+  }
+, "dependencies":
+  { "twitter": ">=0.1.11"
+  , "socket.io": ">=0.6.3"
+  , "creationix": ">=0.0.6"
+  }
+, "engines": ["node >=0.2.0"]
+}
