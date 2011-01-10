@@ -16,7 +16,13 @@ try {
 
 // Twitter (client for Routes and Ripley)
 var twitter = Twitter(config.twitter || null);
+twitter.options.secure = config.secure || false;
 twitter.options.cookie_secret = config.secret || null;
+// why doesn't node-twitter do cookie-secure already?
+twitter.options.cookie_options = {
+	httpOnly: true,
+	secure: config.secure
+};
 
 // Ripley
 var ripley = new Ripley(twitter, config.sitestreams || false);
@@ -26,7 +32,7 @@ var fs = require('fs');
 module.exports = require('http').createServer(require('stack')(
 	require('creationix/log')(),
 	require('./lib/gzip-proc')(),
-	twitter.login('/twauth'),
+	twitter.login(),
 	require('creationix/static')('/static', __dirname + '/static'),
 	twitter.gatekeeper(),
 	require('creationix/static')('/', __dirname + '/static', 'index.html')
@@ -36,17 +42,29 @@ module.exports = require('http').createServer(require('stack')(
 require('socket.io').listen(module.exports).on('connection', function(client) {
 	// Gatekeeper for Socket.io connections
 	var twauth = twitter.cookie(client.request);
+//console.log('SOCKET.IO HEADERS: ' + require('util').inspect(client.request && client.request.headers));
 
 	// Success! Probably a valid cookie
 	if ( twauth && twauth.user_id && twauth.access_token_secret ) {
+		// Deliberately kill off non-alphas
+		if ( config.alphas && config.alphas.indexOf(twauth.screen_name) < 0 ) {
+			console.log('DUMPED NON-ALPHA ' + twauth.screen_name + '!');
+			client.send({AUTHFAIL: "Currently closed for alpha testing. Disconnecting."});
+			setTimeout(function() {
+				if ( client.request ) client.request.connection.end();
+			}, 1000);
+			return;
+		}
+		console.log('HELLO ' + twauth.screen_name + '!');
 		var ripper = ripley.register(twauth);
 		new Proxy(client, ripper);
 
-	// Fail! Computer says no.
+	// Fail! Computer says no. Client might fall back to other socket.io transports.
 	} else {
+		console.log('DUMPED ' + (twauth && twauth.screen_name || 'unauthenticated user') + '!');
 		client.send({AUTHFAIL: "Authentication failure. Disconnecting."});
 		setTimeout(function() {
-			client.request.connection.end();
+			if ( client.request ) client.request.connection.end();
 		}, 1000);
 	}
 });
