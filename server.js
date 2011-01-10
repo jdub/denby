@@ -1,4 +1,4 @@
-var	Twitter = require('/home/jdub/src/node/node-twitter'),
+var	Twitter = require('twitter'),
 	Ripley = require('./lib/ripley'),
 	Proxy = require('./lib/proxy'),
 	conffile = null, config = null;
