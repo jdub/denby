@@ -1,0 +1,197 @@
+%html
+	%head
+		%title Denby
+		%link{:rel => "stylesheet",
+			:type => "text/css",
+			:href => "/static/desktop.css"}/
+		%meta{:'http-equiv' => "X-UA-Compatible", :content => "IE=8,chrome=1"}/
+	%body
+		#dbyhead
+			%h1#dbylogo Denby
+			%fieldset#status-update.ui-widget
+				%textarea#status{:name => "status",
+					:rows => 1, :cols => 20,
+					:accesskey => "u", :tabindex => 1,
+					:autocomplete => "off",
+					:placeholder => "What&rsquo;s happening?"}
+				%input#replyto{:type => "hidden",
+					:name => "in_reply_to_status_id"}
+				%span#statbar-right
+					%span#chars 140
+					%input#tweet.ui-button{:type => "submit",
+						:value => "Tweet",
+						:tabindex => 2,
+						:title => "Send Tweet (Ctrl+Enter)",
+						:disabled => true}
+			#dbyinfo
+		#dbybody
+			#dbycols
+			#dbytbar
+				%span>
+					%button.reply> Reply
+					%button.retweet> Retweet
+					%button.quote> RT:
+					%button.favorite> Favorite
+					%button.unfavorite> Unfavorite
+					%button.delete> Delete
+					%button.follow> Follow
+					%button.unfollow> Unfollow
+					%button.block> Block
+					%button.spam> Spam
+
+		%script#tmpl-dashstats{:type => "text/x-jquery-tmpl"}
+			%ul.user-stats.clearfix
+				%li<
+					%a.profile{:href => "https://twitter.com/settings/profile"}<>
+						%img.photo{:width => 24, :height => 24,
+							:src => "${profile_image_url}"}<>/
+						${screen_name}
+						%span ${name}
+				%li<
+					%a.statuses{:href => "https://twitter.com/${screen_name}",
+						:'data-screen-name' => "${screen_name}"}<>
+						${statuses_count}
+						%span Tweets
+				%li<
+					%a.friends{:href => "https://twitter.com/${screen_name}/following"}<>
+						${friends_count}
+						%span Following
+				%li<
+					%a.followers{:href => "https://twitter.com/${screen_name}/followers"}<>
+						${followers_count}
+						%span Followers
+
+		%script#tmpl-column{:type => "text/x-jquery-tmpl"}
+			.denby-column
+				%h3.ui-widget-header
+					{{if remove}}
+					%span.ui-icon.denby-column-close{:title => "Remove column"}
+					{{/if}}
+					%span.ui-icon.denby-column-clear{:title => "Clear read tweets"}
+					%span.ui-icon.denby-column-read{:title => "Mark as read"}
+					%a{:title => "${header}"} ${header}
+				%ol.ui-widget-content.tweetlist{:id => "${id}"}
+
+		%script#tmpl-tweet{:type => "text/x-jquery-tmpl"}
+			%li.status{:class => "id${id_str} uid${user.id_str}"}
+				.thumb<
+					%a.username{:title => "${user.name}",
+						:'data-screen-name' => "${user.screen_name}",
+						:href => "https://twitter.com/${user.screen_name}"}<>
+						%img.photo{:width => 48, :height => 48,
+							:src => "${user.profile_image_url}"}<>/
+				.status-body.clearfix<
+					%div
+						%span.hidden by
+						{{if user.protected}}
+						%span.icon-private
+						{{/if}}
+						%a.username.screen-name{:title => "${user.name}",
+							:'data-screen-name' => "${user.screen_name}",
+							:href => "https://twitter.com/${user.screen_name}"} ${user.screen_name}
+						%span.hidden at
+						%a.entry-meta.entry-date{:title => "Permalink",
+							:href => "https://twitter.com/${user.screen_name}/status/${id_str}"}
+							%span.timestamp.published{:'data-time' => "{{timestamp created_at}}"} {{time created_at}}
+					.entry-content {{linkify text}}
+
+		%script#tmpl-retweet{:type => "text/x-jquery-tmpl"}
+			%li.status.retweet{:class => "id${id_str} uid${user.id_str} id${retweeted_status.id_str} uid${retweeted_status.user.id_str}"}
+				.thumb<
+					%a.username{:title => "${retweeted_status.user.name}",
+						:'data-screen-name' => "${retweeted_status.user.screen_name}",
+						:href => "https://twitter.com/${retweeted_status.user.screen_name}"}<>
+						%img.photo{:width => 36, :height => 36,
+							:src => "${retweeted_status.user.profile_image_url}"}<>/
+					%img.photo.photo-small{:width => 24, :height => 24,
+						:title => "${user.name}",
+						:src => "${user.profile_image_url}"}<>/
+				.status-body.clearfix<
+					%div
+						%span.hidden by
+						{{if user.protected}}
+						%span.icon-private
+						{{/if}}
+						%a.username.screen-name{:title => "${retweeted_status.user.name}",
+							:'data-screen-name' => "${retweeted_status.user.screen_name}",
+							:href => "https://twitter.com/${retweeted_status.user.screen_name}"} ${retweeted_status.user.screen_name}
+						%span.entry-meta
+							%span.icon-retweet{:title => "Retweeted"} Retweeted
+							by
+							{{if user.protected}}
+							%span.icon-private
+							{{/if}}
+							%a.username.screen-name{:title => "${user.name}",
+								:'data-screen-name' => "${user.screen_name}",
+								:href => "https://twitter.com/${user.screen_name}"} ${user.screen_name}
+						%span.hidden at
+						%a.entry-meta.entry-date{:title => "Permalink",
+							:href => "https://twitter.com/${retweeted_status.user.screen_name}/status/${retweeted_status.id_str}"}
+							%span.timestamp.published{:'data-time' => "{{timestamp retweeted_status.created_at}}"} {{time retweeted_status.created_at}}
+					.entry-content {{linkify retweeted_status.text}}
+
+		%script#tmpl-favorite{:type => "text/x-jquery-tmpl"}
+			%li.status.favorite{:class => "id${target_object.id_str} uid${source.id_str} uid${target.id_str}"}
+				.thumb<
+					%a.username{:title => "${target.name}",
+						:'data-screen-name' => "${target.screen_name}",
+						:href => "https://twitter.com/${target.screen_name}"}<>
+						%img.photo{:width => 36, :height => 36,
+							:src => "${target.profile_image_url}"}<>/
+					%img.photo.photo-small{:width => 24, :height => 24,
+						:title => "${source.name}",
+						:src => "${source.profile_image_url}"}<>/
+				.status-body.clearfix<
+					%div
+						%span.hidden by
+						{{if target.protected}}
+						%span.icon-private
+						{{/if}}
+						%a.username.screen-name{:title => "${target.name}",
+							:'data-screen-name' => "${target.screen_name}",
+							:href => "https://twitter.com/${target.screen_name}"} ${target.screen_name}
+						%span.entry-meta
+							%span.icon-retweet{:title => "Retweeted"} Retweeted
+							by
+							{{if source.protected}}
+							%span.icon-private
+							{{/if}}
+							%a.sourcename.screen-name{:title => "${source.name}",
+								:'data-screen-name' => "${source.screen_name}",
+								:href => "https://twitter.com/${source.screen_name}"} ${source.screen_name}
+						%span.hidden at
+						%a.entry-meta.entry-date{:title => "Permalink",
+							:href => "https://twitter.com/${target.screen_name}/status/${target_object.id_str}"}
+							%span.timestamp.published{:'data-time' => "{{timestamp target_object.created_at}}"} {{time target_object.created_at}}
+					.entry-content {{linkify target_object.text}}
+
+		%script#tmpl-direct{:type => "text/x-jquery-tmpl"}
+			%li.status.direct{:class => "dm${id_str} uid${sender.id_str}"}
+				.thumb<
+					%a.username{:title => "${sender.name}",
+						:'data-screen-name' => "${sender.screen_name}",
+						:href => "https://twitter.com/${sender.screen_name}"}<>
+						%img.photo{:width => 48, :height => 48,
+							:src => "${sender.profile_image_url}"}<>/
+				.status-body.clearfix<
+					%div
+						%a.username.screen-name{:title => "${sender.name}",
+							:'data-screen-name' => "${sender.screen_name}",
+							:href => "https://twitter.com/${sender.screen_name}"} ${sender.screen_name}
+						%span.entry-meta messaged
+						%a.username.screen-name{:title => "${recipient.name}",
+							:'data-screen-name' => "${recipient.screen_name}",
+							:href => "https://twitter.com/${recipient.screen_name}"} ${recipient.screen_name}
+						%span.hidden at
+						%span.entry-meta.entry-date.timestamp.published{:'data-time' => "{{timestamp created_at}}"} {{time created_at}}
+					.entry-content {{linkify text}}
+
+		%script{:src => "/static/LAB.js"}
+		:javascript
+			$LAB
+			.script(document.location.protocol + '//ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js').wait()
+			.script(document.location.protocol + '//ajax.googleapis.com/ajax/libs/jqueryui/1.8.7/jquery-ui.min.js')
+			.script('/socket.io/socket.io.js').wait()
+			.script('/static/denby.js')
+			.script('/static/desktop.js')
+			.wait(function(){ Denby.connect(); });
