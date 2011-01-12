@@ -7,7 +7,7 @@ Welcome! Consider yourself warned. :-)
 
 ### Denby
 
-Web client application (not included in the repository just yet).
+Web interface, currently focused on a multi-column "death star console" style client, but eventually work will be done on multiple user interface and device profiles.
 
 ### Proxy (per-client)
 
