@@ -56,6 +56,8 @@ var regex = {
 /*
  * INITIALISATION
  */
+$tweet.button().button('disable');
+
 $dbytbar.find('span').buttonset();
 $dbytbar.find('.reply').button({icons:{primary:'ui-icon-arrowreturnthick-1-w'}}); // scrawny
 $dbytbar.find('.retweet').button({icons:{primary:'ui-icon-transferthick-e-w'}}); // refresh=thin
@@ -302,16 +304,15 @@ $.subscribe('/denby/twitbox/expand', function() {
 
 $.subscribe('/denby/twitbox/contract', function() {
 	$twitbox.toggleClass('expanded', false);
-	$tweet.attr('disabled', 'disabled');
+	$tweet.button('disable');
 	$status.blur();
 });
 
 $.subscribe('/denby/twitbox/clear', function() {
-	$('#tweet').attr('disabled', 'disabled');
+	$tweet.button('disable');
 	$status.val('').removeAttr('disabled');
 	$replyto.val('');
-	// FIXME: better way to 'reset' the color?
-	$('#chars').text(140).css('color', '#ddd');
+	$chars.text(140).toggleClass('warning toomany', false)
 });
 
 $status
@@ -390,7 +391,7 @@ $status
 		}
 
 		// We're not empty or doing other things, so let the counting begin!
-		$tweet.removeAttr('disabled');
+		$tweet.button('enable');
 
 		// if the first character is not an @, we're not replying anymore
 		// FIXME: this means we're emptying replyto on almost every keyup!
@@ -409,11 +410,11 @@ $status
 		// FIXME: Denby.account().screen_name.length should be cached somewhere
 		// FIXME: choose better colours or better yet, use classes
 		if ( text.length <= (limit - 6 - Denby.account().screen_name.length) ) {
-			$chars.css('color', '#ddd');
+			$chars.toggleClass('warning toomany', false);
 		} else if ( text.length <= limit ) {
-			$chars.css('color', 'orange');
+			$chars.attr('class', 'warning');
 		} else {
-			$chars.css('color', 'red');
+			$chars.attr('class', 'toomany');
 		}
 	});
 
@@ -436,7 +437,7 @@ $tweet.live('click', function(event) {
 	}
 
 	$status.attr('disabled', 'disabled');
-	$tweet.attr('disabled', 'disabled');
+	$tweet.button('disable');
 
 	// FIXME: add timeout in case there's no response, feedback, etc.
 	Denby.send(method, text, params, function(result) {
@@ -666,16 +667,17 @@ $dbytbar.find('.reply').live('click', function(event) {
 	$dbytbar.hide().appendTo($dbybody);
 	li.toggleClass('hover', false);
 
-	$.publish('/denby/twitbox/expand');
-	$status.val(reply).focus();
+	$status.val(reply);
 	$replyto.val(replyto);
 
 	if ( select !== null ) {
 		$status[0].selectionStart = select[0];
-		$status[0].selectionEnd = select[1]
+		$status[0].selectionEnd = select[1];
 	} else {
 		$status[0].selectionStart = $status[0].selectionEnd = reply.length;
 	}
+
+	$.publish('/denby/twitbox/expand');
 
 	return false; // don't bubble my click
 });
@@ -705,9 +707,9 @@ $dbytbar.find('.quote').live('click', function(event) {
 	$dbytbar.hide().appendTo($dbybody);
 	li.toggleClass('hover', false);
 
-	$.publish('/denby/twitbox/expand');
-	$status.val(quote).focus();
+	$status.val(quote);
 	$status[0].selectionStart = $status[0].selectionEnd = 0;
+	$.publish('/denby/twitbox/expand');
 
 	return false; // don't bubble my click
 });
