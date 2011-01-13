@@ -412,9 +412,9 @@ $status
 		if ( text.length <= (limit - 6 - Denby.account().screen_name.length) ) {
 			$chars.toggleClass('warning toomany', false);
 		} else if ( text.length <= limit ) {
-			$chars.attr('class', 'warning');
+			$chars.addClass('warning').removeClass('toomany');
 		} else {
-			$chars.attr('class', 'toomany');
+			$chars.addClass('toomany').removeClass('warning');
 		}
 	});
 
