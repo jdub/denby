@@ -218,6 +218,7 @@ body {
 	left: 0;
 	width: 100%;
 	border-bottom: 1px solid #ccc;
+	padding-bottom: 5px;
 	background: #eee;
 	color: #333;
 
@@ -230,7 +231,7 @@ body {
 		margin-right: 0;
 
 		.ui-button {
-			margin: 0 -5px 5px 0;
+			margin-right: -1px;
 		}
 		.ui-button:hover {
 			z-index: 51;
