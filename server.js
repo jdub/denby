@@ -44,22 +44,21 @@ require('socket.io').listen(module.exports).on('connection', function(client) {
 		// Deliberately kill off non-alphas
 		if ( config.alphas && config.alphas.indexOf(twauth.screen_name.toLowerCase()) < 0 ) {
 			console.log('DUMPED NON-ALPHA ' + twauth.screen_name + '!');
-			client.send({AUTHFAIL: "Currently closed for alpha testing. Disconnecting."});
-			setTimeout(function() {
+			client.send({AUTHFAIL: "Sorry, we're currently closed for alpha testing."});
+			/*setTimeout(function() {
 				if ( client.request ) client.request.connection.end();
-			}, 1000);
-			return;
+			}, 1000);*/
+		} else {
+			console.log('HELLO ' + twauth.screen_name + '!');
+			var ripper = ripley.register(twauth);
+			new Proxy(client, ripper);
 		}
-		console.log('HELLO ' + twauth.screen_name + '!');
-		var ripper = ripley.register(twauth);
-		new Proxy(client, ripper);
-
 	// Fail! Computer says no. Client might fall back to other socket.io transports.
 	} else {
 		console.log('DUMPED ' + (twauth && twauth.screen_name || 'unauthenticated user') + '!');
-		client.send({AUTHFAIL: "Authentication failure. Disconnecting."});
-		setTimeout(function() {
+		client.send({AUTHFAIL: "Authentication failure."});
+		/*setTimeout(function() {
 			if ( client.request ) client.request.connection.end();
-		}, 1000);
+		}, 1000);*/
 	}
 });
