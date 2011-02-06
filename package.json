@@ -19,6 +19,7 @@
   { "twitter": ">=0.1.11"
   , "socket.io": ">=0.6.3"
   , "creationix": ">=0.0.6"
+  , "shorturl": ">=0.0.2"
   }
 , "engines": ["node >=0.2.0"]
 }
